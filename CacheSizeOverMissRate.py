@@ -45,6 +45,8 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             use_db = True
         if use_db:
             store_file = open('pickled_data_set1', 'rb')
+
+
             stored_data = pickle.load(store_file)
             print(stored_data)
             ass_xy, associativities = stored_data
@@ -61,7 +63,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
                 cache_size = 1024 # start from  1 KB     
                 while cache_size <= 131072: # 128 KB
                     output = driver(cache_size, associativity, block_size, memory_accesses) 
-                    x_points.append(cache_size)
+                    x_points.append(cache_size/1024)
                     outputs_driver.append(output)
                     cache_size *= 2
                     # print(step)
@@ -71,7 +73,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 
         store_file.close()
         fig,ax = plt.subplots(figsize=(10, 10))
-
+        ax.set_title('Cache Size Vs Miss Rate')
         
 
         legends = []
@@ -80,13 +82,16 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             for points in ass[1]:
                 y_points.append(points['miss_rate'])
             
-            lines, = plt.plot(ass[0], y_points, label = str(associativities[index]) + ' Way Associative')
+            lines, = plt.plot(range(len(ass[0])), y_points, label = str(associativities[index]) + ' Way Associative')
+            ax.fill_between(range(len(ass[0])), 0, y_points)
             legends.append(lines)
 
 
         plt.legend(handles=legends)
-        plt.xlabel('Cache Size (Bytes)')
+        plt.xlabel('Cache Size (KiloBytes)')
         plt.ylabel('Miss Rate')
+        plt.xticks(range(len(ass[0])), ass_xy[0][0])
+
         # plt.xscale('log')
         plt.show()
 
